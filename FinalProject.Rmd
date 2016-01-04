@@ -1,0 +1,123 @@
+---
+title: "EDAProject"
+author: "KenDopp"
+date: "Saturday, July 11, 2015"
+output: html_document
+---
+#Citation   
+  P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
+  Modeling wine preferences by data mining from physicochemical properties.
+  In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+
+  Available at: [@Elsevier] http://dx.doi.org/10.1016/j.dss.2009.05.016
+                [Pre-press (pdf)] http://www3.dsi.uminho.pt/pcortez/winequality09.pdf
+                [bib] http://www3.dsi.uminho.pt/pcortez/dss09.bib
+
+
+#load in the data
+```{r}
+getwd()
+setwd("C:/Users/Kenneth/Desktop/UdacityFC/Intro to R/IntrotoRFinalProject/")
+list.files()
+wd<- read.csv('wineQualityReds.csv')
+```
+
+#do some exploring, my first step is to see how all of the 12 variables relate to quality and to spot out any patterns
+```{r}
+names(wd)
+library(ggplot2)
+
+
+ggplot(aes(x = alcohol, y = quality), data = wd) + geom_point(position = 'jitter')
+#seems to be somewhat of a correlation between how good the wines are and how much alcohol they have
+
+
+ggplot(aes(x = free.sulfur.dioxide, y = quality), data = wd) + geom_point(position = 'jitter')
+#somewhat of a normal distribution between sulfur dioxide and quality, with both the worst and best wines 
+#tho, the distribution is somewhat skewed so to improve wine quality a quick check could just to check the sulfure dioxide as if it's above 30 it's basically guaranteed that it is at least an average (i.e. not horrible) wine
+
+
+
+ggplot(aes(x = chlorides, y = quality), data = wd) + geom_point(position = 'jitter')
+#somewhat similar to sulfur dioxide, high concentrations lead to an average quality
+
+
+ggplot(aes(x = X, y = quality), data = wd) + geom_point(position = 'jitter')
+#I cant make out any patterns here, seems to be totally unrelated to quality
+
+ggplot(aes(x = fixed.acidity, y = quality), data = wd) + geom_point(position = 'jitter')
+#same pattern, exteme values produce average wine
+
+ggplot(aes(x = volatile.acidity, y = quality), data = wd) + geom_point(position = 'jitter')
+#weak negative correlation between volatile acidity and quality, all over 1 are less than average
+
+ggplot(aes(x = citric.acid, y = quality), data = wd) + geom_point(position = 'jitter')
+#kinda similar pattern to other variables like X or fixed acidity, only here great wines can have a high citric 
+#acid amount as well as average ones, thus having a high citric acid amount leads to at least decent quality
+#tho it's not really correlated in the sense that more leads to high quality, that only works to a til it reaches a quality of about 5
+
+ggplot(aes(x = residual.sugar, y = quality), data = wd) + geom_point(position = 'jitter')
+#looks basically the same as chlorides, same pattern of more to get average quality and sort of a normal distribution,
+#so lots of sugar is a good indication that it's a decent wine, and low sugar increases the probability of a great
+#or horrible quality wine
+
+ggplot(aes(x = total.sulfur.dioxide, y = quality), data = wd) + geom_point(position = 'jitter')
+#normal distribution pattern, also very similar to free sulfur dioxide, two outliers here that seem to suggest
+#exteme values don't diminish quality, but the general pattern is clearly more leads to average quality
+
+ggplot(aes(x = density, y = quality), data = wd) + geom_point(position = 'jitter')
+#no real correlation but extremely low or high densities indicate average quality
+#on second thought, there appears to be a weak negative correlation between density and quality, less dense is better
+
+ggplot(aes(x = pH, y = quality), data = wd) + geom_point(position = 'jitter')
+#seems like no correlation whatsoever
+
+ggplot(aes(x = sulphates, y = quality), data = subset(wd, wd$sulphates <= quantile(wd$sulphates, 0.99))) + geom_point(alpha = 1/2, position = 'jitter') 
+#noticeable correlation with extreme values indicating average quality but beneath about 1/ cutting out extreme
+#values appears to be a decent correlation
+#seems highly correlated up until about 0.75, then above this value means that the wine is not horrible but it's basically uncorrelated as long as it's above 4.5
+#make graph of filtered sulphates to see if hypothesized relationship holds, also look at correlation
+
+
+#using ggpairs to get an overview
+
+library(GGally)
+library(scales)
+library(memisc)
+ggpairs(wd)
+#key takeaway is high correlation with alcohol(highest), strong negative with citric.acid, and some others decently strong
+
+#do some qplots to see the numbers at different ratings
+qplot(data = wd, x = quality, binwidth = 0.5)
+#normal, slightly skewed left curve, few under 4 or above 8
+
+```
+#So I noticed a few things here, there are basically 2 categories, ones like Alchohol seems to have a fairly 
+#straightforward linear relationship. Others like residual sugar have a sort of normal distribution where extreme positive values are an indicator of average quality (so could be a useful test to make sure your wine is at least decent), however extreme values filter out both low and high quality wines. Sulphates is a sort of other category
+
+#exhibiting both a linear relationship and the extreme values meaning high quality
+
+#qualities that appear to have no relation to quality:
+X, pH
+#qualities that seem to have somewhat of a direct correlation
+Alcohol
+volatile.acidity
+residual.sugar
+density
+sulphates
+#super high values means mediocre, jacking up these valus should guarantee a saleable wine
+free.sulfur.dioxide
+chlorides
+fixed.acidity
+citric.acid
+total.sulfur.dioxide
+
+#linear model of quality
+```{r}
+m1 <- lm(I(quality) ~ I(citric.acid), data = wd)
+m2 <- update(m1, ~ . + sulphates)
+mtable(m1)
+
+
+```
+
