@@ -95,7 +95,15 @@ qplot(data = wd, x = fixed.acidity)
 ggplot(aes(x = fixed.acidity, y = quality), data = wd) + geom_point(position = 'jitter')
 #this makes sense, if fixed.acidity is uncorrelated with quality then it can have a skewed distribution while quality has a normal
 
+#going to take a look at more than one variable, both of which are correlated with quality so alcohol colored by 
+ggplot(aes(x = alcohol, y = quality), data = wd) + geom_jitter(aes(color = sulphates))
+#nothing obvious whatesoever
 
+#some of the values such as residual.sugar and chlorides which predict mediocreness at extreme values may be 
+#highly correlated themselves so going to test that
+ggplot(aes(x = residual.sugar, y = chlorides), data = wd) + geom_point()
+#hmm okay here's something very intriguing, they are clearly inversely related. Extremely high chlorides means
+#extremely low sugar and extemely high sugar means low chloride. This could be causing the mediocreness
 ```
 #So I noticed a few things here, there are basically 2 categories, ones like Alchohol seems to have a fairly 
 #straightforward linear relationship. Others like residual sugar have a sort of normal distribution where extreme positive values are an indicator of average quality (so could be a useful test to make sure your wine is at least decent), however extreme values filter out both low and high quality wines. Sulphates is a sort of other category
