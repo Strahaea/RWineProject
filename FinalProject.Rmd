@@ -17,7 +17,7 @@ output: html_document
 #load in the data
 ```{r}
 getwd()
-setwd("C:/Users/Kenneth/Desktop/UdacityFC/Intro to R/IntrotoRFinalProject/")
+setwd("C:/Users/Kenneth/Desktop/UdacityFC/R/IntrotoRFinalProject/")
 list.files()
 wd<- read.csv('wineQualityReds.csv')
 ```
@@ -40,10 +40,6 @@ ggplot(aes(x = free.sulfur.dioxide, y = quality), data = wd) + geom_point(positi
 
 ggplot(aes(x = chlorides, y = quality), data = wd) + geom_point(position = 'jitter')
 #somewhat similar to sulfur dioxide, high concentrations lead to an average quality
-
-
-ggplot(aes(x = X, y = quality), data = wd) + geom_point(position = 'jitter')
-#I cant make out any patterns here, seems to be totally unrelated to quality
 
 ggplot(aes(x = fixed.acidity, y = quality), data = wd) + geom_point(position = 'jitter')
 #same pattern, exteme values produce average wine
@@ -87,9 +83,18 @@ library(memisc)
 ggpairs(wd)
 #key takeaway is high correlation with alcohol(highest), strong negative with citric.acid, and some others decently strong
 
-#do some qplots to see the numbers at different ratings
+#do some qplots to see the numbers at different ratings, pHs etc. to make sure they're all normalish or if not to note that
 qplot(data = wd, x = quality, binwidth = 0.5)
-#normal, slightly skewed left curve, few under 4 or above 8
+#normal, kind of what you'd expect, slightly skewed left curve, few under 4 or above 8
+qplot(data = wd, x = pH)
+#normal with a few extreme values
+qplot(data = wd, x = fixed.acidity)
+#clearly skewed right, seems like that could be relevant as this is a component to ratings yet the ratings overall have a skew the other direction
+
+#I'm interested in exploring what the deal with fixed.acidity is there, going to replot rating vs. fixed.acidity
+ggplot(aes(x = fixed.acidity, y = quality), data = wd) + geom_point(position = 'jitter')
+#this makes sense, if fixed.acidity is uncorrelated with quality then it can have a skewed distribution while quality has a normal
+
 
 ```
 #So I noticed a few things here, there are basically 2 categories, ones like Alchohol seems to have a fairly 
